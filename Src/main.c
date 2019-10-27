@@ -14,17 +14,18 @@ static void MX_GPIO_Init(void);
 static void MX_USART3_UART_Init(void);
 static void print(char string[]);
 
+
 //other functions prototypes.
-void vContinuousProcessingTask(void *pvParameters);
-void vPeriodicTask(void *pvParameters);
+void vTask1(void *pvParameters);
+void vTask2(void *pvParameters);
+
+
+//Global variables go here!
+TaskHandle_t xTask2Handle = NULL;
 
 int main(void)
 {
 
-	//define the strings that will be passed in as the task parameters.
-  static const char *pcTextForContinuousTask1 = "Continuous1 Task is Running!\r\n";
-  static const char *pcTextForContinuousTask2 = "Continuous2 Task is Running!\r\n";
-  static const char *pcTextForPeriodicTask = "Periodic Task is Running!\r\n";
 
   HAL_Init();
 
@@ -33,11 +34,9 @@ int main(void)
 
   MX_USART3_UART_Init();
 
-  xTaskCreate(vContinuousProcessingTask, "Continuous Task1", 1000, (void*)pcTextForContinuousTask1, 1, NULL);
+  xTaskCreate(vTask1, "Task 1", 1000, NULL, 2, NULL);
 
-  xTaskCreate(vContinuousProcessingTask, "Continuous Task2", 1000, (void*)pcTextForContinuousTask2, 1, NULL);
-
-  xTaskCreate(vPeriodicTask, "Periodic Task", 1000, (void*)pcTextForPeriodicTask, 2, NULL);
+  xTaskCreate(vTask2, "Task 2", 1000, NULL, 1, &xTask2Handle);
 
   vTaskStartScheduler();
 
@@ -126,33 +125,32 @@ static void MX_GPIO_Init(void)
 
 void Error_Handler(void)
 {
-	print("Error in USART3\n");
+	print("Error in USART3\r\n");
 }
 
+void vTask1(void *pvParameters){
+	UBaseType_t uxPriority;
 
-void vContinuousProcessingTask(void *pvParameters){
-
-	char *pcTaskName;
-
-	pcTaskName = (char *) pvParameters;
+	uxPriority = uxTaskPriorityGet(NULL);
 
 	for(;;){
-		print(pcTaskName);
-		vTaskDelay(pdMS_TO_TICKS(10));
+		print("Task 1 is running!\r\n");
+		print("About to Raise Task 2 Priority!\r\n");
+		vTaskPrioritySet(xTask2Handle,  (uxPriority + 1));
 	}
 }
 
 
-void vPeriodicTask(void *pvParameters){
-	char *pcTaskName;
+void vTask2(void *pvParameters){
+	UBaseType_t uxPriority;
 
-	TickType_t xLastWakeTime = xTaskGetTickCount();
-
-	pcTaskName = (char *) pvParameters;
+	uxPriority = uxTaskPriorityGet(NULL);
 
 	for(;;){
-		print(pcTaskName);
-		vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS(500));
+		print("Task 2 is running!\r\n");
+		print("About to lower Task 2 Priority!\r\n");
+
+		vTaskPrioritySet(NULL, (uxPriority - 2));
 	}
 }
 
