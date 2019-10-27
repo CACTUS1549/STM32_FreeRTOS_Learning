@@ -13,13 +13,17 @@ UART_HandleTypeDef huart3;
 static void MX_GPIO_Init(void);
 static void MX_USART3_UART_Init(void);
 static void print(char string[]);
+void vTaskFunction(void *pvParameters);
 
-void vTask1(void *pvParameters);
-void vTask2(void *pvParameters);
+
 
 
 int main(void)
 {
+
+	//define the strings that will be passed in as the task parameters.
+  static const char *pcTextForTask1 = "Hello, Task 1 is Running!\r\n";
+  static const char *pcTextForTask2 = "Hello, Task 2 is Running!\r\n";
 
   HAL_Init();
 
@@ -28,9 +32,9 @@ int main(void)
 
   MX_USART3_UART_Init();
 
-  xTaskCreate(vTask1, "Task1", 1000, NULL, 1, NULL);
+  xTaskCreate(vTaskFunction, "Task1", 1000, (void*)pcTextForTask1, 1, NULL);
 
-  xTaskCreate(vTask2, "Task2", 1000, NULL, 1, NULL);
+  xTaskCreate(vTaskFunction, "Task2", 1000, (void*)pcTextForTask2, 1, NULL);
 
   vTaskStartScheduler();
 
@@ -123,22 +127,19 @@ void Error_Handler(void)
 }
 
 
-void vTask1(void *pvParameters){
+void vTaskFunction(void *pvParameters){
 
-	for(;;){
-		print("Task 1 is running!\r\n");
+	//create a pointer variable to store the parameter.
+	char *pcTaskName;
+
+	//the string to print out is passed in via the parameter. Cast this to a character pointer.
+	pcTaskName = (char * ) pvParameters;
+
+	for (;;) {
+		print(pcTaskName);
 		HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
 		vTaskDelay(1000);
 	}
-}
-
-
-void vTask2(void *pvParameters){
-	for(;;){
-			print("Task 2 is running!\r\n");
-			HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-			vTaskDelay(1000);
-		}
 }
 
 
