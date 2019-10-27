@@ -43,7 +43,7 @@ cmsis_os.c:1478:10:osThreadSuspend	16	static
 cmsis_os.c:1494:10:osThreadResume	16	static,ignoring_inline_asm
 cmsis_os.c:1518:10:osThreadSuspendAll	8	static
 cmsis_os.c:1529:10:osThreadResumeAll	8	static
-cmsis_os.c:1546:10:osDelayUntil	16	static
+cmsis_os.c:1546:10:osDelayUntil	24	static
 cmsis_os.c:1566:10:osAbortDelay	16	static
 cmsis_os.c:1587:10:osThreadList	16	static
 cmsis_os.c:1601:9:osMessagePeek	48	static

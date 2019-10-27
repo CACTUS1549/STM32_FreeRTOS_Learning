@@ -9,21 +9,22 @@
 
 UART_HandleTypeDef huart3;
 
-
+//static funtion prototypes for global availability.
 static void MX_GPIO_Init(void);
 static void MX_USART3_UART_Init(void);
 static void print(char string[]);
-void vTaskFunction(void *pvParameters);
 
-
-
+//other functions prototypes.
+void vContinuousProcessingTask(void *pvParameters);
+void vPeriodicTask(void *pvParameters);
 
 int main(void)
 {
 
 	//define the strings that will be passed in as the task parameters.
-  static const char *pcTextForTask1 = "Hello, Task 1 is Running!\r\n";
-  static const char *pcTextForTask2 = "Hello, Task 2 is Running!\r\n";
+  static const char *pcTextForContinuousTask1 = "Continuous1 Task is Running!\r\n";
+  static const char *pcTextForContinuousTask2 = "Continuous2 Task is Running!\r\n";
+  static const char *pcTextForPeriodicTask = "Periodic Task is Running!\r\n";
 
   HAL_Init();
 
@@ -32,9 +33,11 @@ int main(void)
 
   MX_USART3_UART_Init();
 
-  xTaskCreate(vTaskFunction, "Task1", 1000, (void*)pcTextForTask1, 1, NULL);
+  xTaskCreate(vContinuousProcessingTask, "Continuous Task1", 1000, (void*)pcTextForContinuousTask1, 1, NULL);
 
-  xTaskCreate(vTaskFunction, "Task2", 1000, (void*)pcTextForTask2, 1, NULL);
+  xTaskCreate(vContinuousProcessingTask, "Continuous Task2", 1000, (void*)pcTextForContinuousTask2, 1, NULL);
+
+  xTaskCreate(vPeriodicTask, "Periodic Task", 1000, (void*)pcTextForPeriodicTask, 2, NULL);
 
   vTaskStartScheduler();
 
@@ -127,18 +130,29 @@ void Error_Handler(void)
 }
 
 
-void vTaskFunction(void *pvParameters){
+void vContinuousProcessingTask(void *pvParameters){
 
-	//create a pointer variable to store the parameter.
 	char *pcTaskName;
 
-	//the string to print out is passed in via the parameter. Cast this to a character pointer.
-	pcTaskName = (char * ) pvParameters;
+	pcTaskName = (char *) pvParameters;
 
-	for (;;) {
+	for(;;){
 		print(pcTaskName);
-		HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
-		vTaskDelay(1000);
+		vTaskDelay(pdMS_TO_TICKS(10));
+	}
+}
+
+
+void vPeriodicTask(void *pvParameters){
+	char *pcTaskName;
+
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+
+	pcTaskName = (char *) pvParameters;
+
+	for(;;){
+		print(pcTaskName);
+		vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS(500));
 	}
 }
 
