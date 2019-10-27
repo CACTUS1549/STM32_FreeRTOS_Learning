@@ -73,6 +73,11 @@
 #define configUSE_COUNTING_SEMAPHORES            1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION  1
 
+ //set configIDLE_SHOULD_YIELD 0 to make idle task remain running for entirety of its time slice.
+ //set configIDLE_SHOULD_YIELD 1 to make idle task yield whatever remains of its allocated time slice to other idlepriority tasks.
+#define configIDLE_SHOULD_YIELD					 1
+
+
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES                    0
 #define configMAX_CO_ROUTINE_PRIORITIES          ( 2 )
