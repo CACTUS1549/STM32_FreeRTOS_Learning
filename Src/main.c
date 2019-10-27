@@ -36,8 +36,6 @@ int main(void)
 
   xTaskCreate(vTask1, "Task 1", 1000, NULL, 2, NULL);
 
-  xTaskCreate(vTask2, "Task 2", 1000, NULL, 1, &xTask2Handle);
-
   vTaskStartScheduler();
 
   for(;;);
@@ -129,30 +127,24 @@ void Error_Handler(void)
 }
 
 void vTask1(void *pvParameters){
-	UBaseType_t uxPriority;
 
-	uxPriority = uxTaskPriorityGet(NULL);
 
 	for(;;){
 		print("Task 1 is running!\r\n");
-		print("About to Raise Task 2 Priority!\r\n");
-		vTaskPrioritySet(xTask2Handle,  (uxPriority + 1));
+
+		//Create Task 2 @ higher priority
+		xTaskCreate(vTask2, "Task 2", 1000, NULL, 2, &xTask2Handle);
+
+		//By now Task 2 must be running and should delete itself. Give some delay for the idle task to clean up resources.
+		vTaskDelay(pdMS_TO_TICKS(100));
 	}
 }
-
 
 void vTask2(void *pvParameters){
-	UBaseType_t uxPriority;
-
-	uxPriority = uxTaskPriorityGet(NULL);
-
-	for(;;){
-		print("Task 2 is running!\r\n");
-		print("About to lower Task 2 Priority!\r\n");
-
-		vTaskPrioritySet(NULL, (uxPriority - 2));
-	}
+	print("Task 2 is running and is about to delete itself!\r\n");
+	vTaskDelete(xTask2Handle);
 }
+
 
 
 
