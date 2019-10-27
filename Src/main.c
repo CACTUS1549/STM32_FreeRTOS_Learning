@@ -2,6 +2,9 @@
 #include "main.h"
 #include <stdio.h>
 #include <string.h>
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
 
 
 UART_HandleTypeDef huart3;
@@ -10,6 +13,9 @@ UART_HandleTypeDef huart3;
 static void MX_GPIO_Init(void);
 static void MX_USART3_UART_Init(void);
 static void print(char string[]);
+
+void vTask1(void *pvParameters);
+void vTask2(void *pvParameters);
 
 
 int main(void)
@@ -22,16 +28,18 @@ int main(void)
 
   MX_USART3_UART_Init();
 
+  xTaskCreate(vTask1, "Task1", 1000, NULL, 1, NULL);
 
-  while (1)
-  {
-	  print("Hello Deepak!\r\n");
- }
+  xTaskCreate(vTask2, "Task2", 1000, NULL, 1, NULL);
+
+  vTaskStartScheduler();
+
+  for(;;);
 
 }
 
 static void print(char string[]){
-	char buffer[200];
+	char buffer[300];
 	int len;
 	sprintf(buffer, string);
 	len = strlen(buffer);
@@ -39,11 +47,7 @@ static void print(char string[]){
 
 }
 
-/**
-  * @brief USART3 Initialization Function
-  * @param None
-  * @retval None
-  */
+
 static void MX_USART3_UART_Init(void)
 {
 
@@ -62,11 +66,7 @@ static void MX_USART3_UART_Init(void)
 
 }
 
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
+
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -116,11 +116,56 @@ static void MX_GPIO_Init(void)
 }
 
 
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+
 void Error_Handler(void)
 {
-	print("Error in USART3");
+	print("Error in USART3\n");
 }
+
+
+void vTask1(void *pvParameters){
+
+	for(;;){
+		print("Task 1 is running!\r\n");
+		HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
+		vTaskDelay(1000);
+	}
+}
+
+
+void vTask2(void *pvParameters){
+	for(;;){
+			print("Task 2 is running!\r\n");
+			HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+			vTaskDelay(1000);
+		}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

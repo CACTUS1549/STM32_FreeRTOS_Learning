@@ -1,5 +1,7 @@
-main.c:15:5:main	8	static
-main.c:33:13:print	224	static
-main.c:47:13:MX_USART3_UART_Init	8	static
+main.c:21:5:main	16	static
+main.c:41:13:print	320	static
+main.c:51:13:MX_USART3_UART_Init	8	static
 main.c:70:13:MX_GPIO_Init	40	static
-main.c:123:6:Error_Handler	8	static
+main.c:120:6:Error_Handler	8	static
+main.c:126:6:vTask1	16	static
+main.c:136:6:vTask2	16	static
